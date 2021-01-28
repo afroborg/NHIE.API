@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { getRandom } from '../services/array-services';
 import { deleteDoc, getDocs, setDoc } from '../services/firestore-service';
 
 const router = Router();
@@ -13,6 +14,34 @@ router.get('/', async (req, res) => {
   res.send({
     total: questions.length,
     questions: questions.map((q: any) => ({ title: q.title, id: q.id })),
+  });
+});
+
+router.get('/random', async (req, res) => {
+  const limit = parseInt(req.query.limit?.toString() ?? '100');
+
+  const questions = await getDocs(COLLECTION, 999);
+
+  const random = getRandom(questions, limit);
+
+  random.forEach((q) => {
+    setDoc(COLLECTION, { ...q, timesUsed: q.timesUsed + 1 }, q.id);
+  });
+
+  res.send({
+    total: random.length,
+    questions: random.map((q: any) => ({ title: q.title, id: q.id })),
+  });
+});
+
+router.get('/details', async (req, res) => {
+  const limit = parseInt(req.query.limit?.toString() ?? '100');
+
+  const questions = await getDocs(COLLECTION, limit);
+
+  res.send({
+    total: questions.length,
+    questions,
   });
 });
 
