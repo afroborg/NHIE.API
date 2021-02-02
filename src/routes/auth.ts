@@ -12,7 +12,11 @@ router.post('/', async (req, res) => {
   const password =
     (await getDoc<{ value: string }>('secrets', 'password')).value ??
     config.PASSWORD;
-  return res.status(body.password === password ? 200 : 401).send();
+  if (body.password === password) {
+    return res.status(200).send();
+  } else {
+    return res.status(401).send('Lösenordet är felaktigt.');
+  }
 });
 
 router.post('/password', async (req, res) => {
