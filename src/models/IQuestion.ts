@@ -1,4 +1,11 @@
 export interface IQuestion {
   title: string;
-  added: Date;
+  dateAdded: Date;
+  timesUsed: number;
+  id?: string;
+}
+
+export interface IQuestionForPlay {
+  title: string;
+  id: string;
 }

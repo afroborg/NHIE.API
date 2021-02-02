@@ -1,4 +1,4 @@
-export const getRandom = (arr: any[], n: number) => {
+export const getRandom = <T>(arr: T[], n: number = arr.length): T[] => {
   const result = new Array(n);
   let len = arr.length;
   const taken = new Array(len);

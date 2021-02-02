@@ -1,6 +1,10 @@
 import { Router } from 'express';
-import { getRandom } from '../services/array-services';
-import { deleteDoc, getDocs, setDoc } from '../services/firestore-service';
+import { deleteDoc, setDoc } from '../services/firestore-service';
+import {
+  getQuestions,
+  getQuestionsForPlay,
+  updateMultipleQuestions,
+} from '../services/question-services';
 
 const router = Router();
 
@@ -9,40 +13,25 @@ const COLLECTION = 'questions';
 router.get('/', async (req, res) => {
   const limit = parseInt(req.query.limit?.toString() ?? '100');
 
-  const questions = await getDocs(COLLECTION, limit);
+  const questions = await getQuestions(limit, false);
 
-  res.send({
-    total: questions.length,
-    questions: questions.map((q: any) => ({ title: q.title, id: q.id })),
-  });
+  res.send(questions);
 });
 
 router.get('/random', async (req, res) => {
   const limit = parseInt(req.query.limit?.toString() ?? '100');
 
-  const questions = await getDocs(COLLECTION, 999);
+  const questions = await getQuestionsForPlay(limit);
 
-  const random = getRandom(questions, limit);
-
-  random.forEach((q) => {
-    setDoc(COLLECTION, { ...q, timesUsed: q.timesUsed + 1 }, q.id);
-  });
-
-  res.send({
-    total: random.length,
-    questions: random.map((q: any) => ({ title: q.title, id: q.id })),
-  });
+  res.send(questions);
 });
 
 router.get('/details', async (req, res) => {
   const limit = parseInt(req.query.limit?.toString() ?? '100');
 
-  const questions = await getDocs(COLLECTION, limit);
+  const questions = await getQuestions(limit);
 
-  res.send({
-    total: questions.length,
-    questions,
-  });
+  res.send(questions);
 });
 
 router.post('/', async (req, res) => {
@@ -62,10 +51,13 @@ router.post('/', async (req, res) => {
 
 router.post('/multiple', async (req, res) => {
   const { body } = req;
-  body.forEach(async (s: string) => {
-    await setDoc(COLLECTION, { title: s, dateAdded: new Date(), timesUsed: 0 });
-  });
-  return res.send(200);
+  if (body instanceof Array) {
+    await updateMultipleQuestions(
+      body.map((s) => ({ title: s, dateAdded: new Date(), timesUsed: 0 }))
+    );
+    return res.send(200);
+  }
+  return res.status(400).send(null);
 });
 
 router.put('/:id', async (req, res) => {

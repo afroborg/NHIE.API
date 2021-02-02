@@ -2,7 +2,8 @@ import { json } from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 import * as functions from 'firebase-functions';
-import config from './config';
+import { withAuth } from './middlewares/auth.middleware';
+import { withFormattedResponse } from './middlewares/response.middleware';
 import auth from './routes/auth';
 import questions from './routes/questions';
 
@@ -13,13 +14,11 @@ app.use(cors());
 app.use(json());
 app.use('/api', router);
 
+router.use(withFormattedResponse);
+
 router.use('/auth', auth);
 
-router.use((req, res, next) => {
-  if (req.headers.authorization !== config.API_KEY)
-    return res.status(401).send();
-  next();
-});
+router.use(withAuth);
 
 router.use('/questions', questions);
 

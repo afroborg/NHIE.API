@@ -22,6 +22,36 @@ export const setDoc = (collection: string, data: any, doc?: string) =>
 export const deleteDoc = (collection: string, doc: string) =>
   db.collection(collection).doc(doc).delete();
 
+export const getDoc = <T>(collection: string, document: string): Promise<T> =>
+  db
+    .collection(collection)
+    .doc(document)
+    .get()
+    .then((snapshot) => snapshot.data() as T);
+
+export const updateMultiple = async (
+  collection: string,
+  docs: string[],
+  update: any
+) => {
+  const batch = db.batch();
+  docs.forEach((doc, i) => {
+    const ref = db.collection(collection).doc(doc);
+    batch.update(ref, update instanceof Array ? update[i] : update);
+  });
+
+  await batch.commit();
+};
+
+export const setMultiple = async (collection: string, data: any[]) => {
+  const batch = db.batch();
+  data.forEach((d) => {
+    const ref = db.collection(collection).doc();
+    batch.set(ref, d);
+  });
+  await batch.commit();
+};
+
 const toArray = <T>(
   docs: firestore.QueryDocumentSnapshot<firestore.DocumentData>[]
 ): T[] => {
