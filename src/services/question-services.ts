@@ -17,9 +17,11 @@ export const getQuestions = (
       .catch(reject);
   });
 
-export const getQuestionsForPlay = (limit = 100): Promise<IQuestionForPlay[]> =>
+export const getQuestionsForPlay = (
+  limit: number
+): Promise<IQuestionForPlay[]> =>
   new Promise((resolve, reject) => {
-    getDocs<IQuestion>(COLLECTION)
+    getDocs<IQuestion>(COLLECTION, 999)
       .then((docs) => {
         const random = getRandom(docs, limit);
 
